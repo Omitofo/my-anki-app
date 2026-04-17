@@ -8,6 +8,7 @@ import { CategorySelector } from '@/components/navigation/CategorySelector'
 import { DeckSelector } from '@/components/navigation/DeckSelector'
 import { StudyView } from '@/components/study/StudyView'
 import { Button } from '@/components/ui/Button'
+import Link from 'next/link'
 
 const LEVEL_TITLES: Record<string, { heading: string; sub: string }> = {
   domain:   { heading: 'What would you like to study?', sub: 'Choose a domain to begin' },
@@ -44,10 +45,13 @@ export default function StudyPage() {
             <Breadcrumb />
           </div>
 
-          {/* Logo */}
-          <span className="font-display text-xl text-ink tracking-tight shrink-0">
-            Kardu<span className="text-accent">.</span>
-          </span>
+{/* Logo */}
+<Link
+  href="/"
+  className="font-display text-xl text-ink tracking-tight shrink-0 hover:text-accent transition-colors"
+>
+  Kardu<span className="text-accent">.</span>
+</Link>
         </div>
       </header>
 
