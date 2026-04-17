@@ -49,7 +49,29 @@ body {
   min-height: 100dvh;
 }
 
-/* Perspective for 3D card flip */
+/* ─── Animated blob keyframes ─────────────────────────────────── */
+
+@keyframes blobDrift1 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(25px, 15px) scale(1.03); }
+}
+
+@keyframes blobDrift2 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(-20px, 25px) scale(1.04); }
+}
+
+@keyframes blobDrift3 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(18px, -22px) scale(1.02); }
+}
+
+@keyframes blobDrift4 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(-15px, 18px) scale(1.03); }
+}
+
+/* ─── Perspective for 3D card flip ───────────────────────────── */
 .perspective {
   perspective: 1200px;
 }

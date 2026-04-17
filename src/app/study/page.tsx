@@ -27,31 +27,42 @@ export default function StudyPage() {
 
   return (
     <div className="min-h-dvh bg-paper flex flex-col">
-      {/* Header */}
+      {/* Header — 3-column grid so breadcrumb is always centered */}
       <header className="sticky top-0 z-20 bg-paper/90 backdrop-blur-sm border-b border-mist/10">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            {level !== 'domain' && (
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 grid grid-cols-[auto_1fr_auto] items-center gap-2">
+          {/* Left: back button — icon only on mobile, text on sm+ */}
+          <div className="flex items-center min-w-[40px]">
+            {level !== 'domain' ? (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={goBack}
-                className="text-mist hover:text-ink -ml-1"
+                className="text-mist hover:text-ink -ml-1 shrink-0"
                 aria-label="Go back"
               >
-                ← Back
+                <span>←</span>
+                <span className="hidden sm:inline ml-1">Back</span>
               </Button>
+            ) : (
+              /* placeholder to hold grid layout */
+              <span />
             )}
+          </div>
+
+          {/* Center: breadcrumb — truncates gracefully on mobile */}
+          <div className="flex items-center justify-center overflow-hidden">
             <Breadcrumb />
           </div>
 
-{/* Logo */}
-<Link
-  href="/"
-  className="font-display text-xl text-ink tracking-tight shrink-0 hover:text-accent transition-colors"
->
-  Kardu<span className="text-accent">.</span>
-</Link>
+          {/* Right: logo */}
+          <div className="flex items-center justify-end min-w-[40px]">
+            <Link
+              href="/"
+              className="font-display text-xl text-ink tracking-tight shrink-0 hover:text-accent transition-colors"
+            >
+              Kardu<span className="text-accent">.</span>
+            </Link>
+          </div>
         </div>
       </header>
 

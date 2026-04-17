@@ -17,16 +17,14 @@ export function FlashCard({ card }: FlashCardProps) {
     <div
       className="perspective w-full cursor-pointer select-none"
       onClick={flipCard}
+      // tabIndex removed — keyboard handling is done globally in KeyboardHint
+      // This prevents the card from stealing focus and causing the space-key glitch
       role="button"
-      tabIndex={0}
       aria-label={isFlipped ? 'Card back — click to see front' : 'Card front — click to reveal'}
-      onKeyDown={(e) => {
-        if (e.key === ' ' || e.key === 'Enter') flipCard()
-      }}
     >
-      {/* FIXED HEIGHT WRAPPER (no padding hacks) */}
+      {/* FIXED HEIGHT WRAPPER */}
       <div className="relative w-full h-[320px] sm:h-[400px]">
-        
+
         {/* INNER FLIP CONTAINER */}
         <div className={`card-inner w-full h-full ${isFlipped ? 'flipped' : ''}`}>
 
@@ -92,12 +90,17 @@ export function FlashCard({ card }: FlashCardProps) {
 
                 {card.example && (
                   <div className="mt-4 bg-ink-soft rounded-2xl px-5 py-3 max-w-sm w-full">
-                    <p className="text-xs text-mist/60 uppercase tracking-widest mb-1 font-mono">
+                    <p className="text-xs text-mist/60 uppercase tracking-widest mb-1 font-mono text-center">
                       Example
                     </p>
                     <p className="text-sm text-mist text-center">
                       {card.example}
                     </p>
+                    {card.example_translation && (
+                      <p className="text-xs text-mist/50 italic text-center mt-1">
+                        {card.example_translation}
+                      </p>
+                    )}
                   </div>
                 )}
               </div>

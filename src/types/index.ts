@@ -37,6 +37,8 @@ export interface Card {
   back: string
   translation?: string
   example?: string
+  /** Translation of the example sentence */
+  example_translation?: string
   notes?: string
   difficulty: number
   created_at: string
