@@ -2,54 +2,122 @@
 
 import { useEffect, useRef } from 'react'
 
-export function AnimatedBackground() {
-  const blobRef = useRef<HTMLDivElement>(null)
-  const mouse = useRef({ x: 0, y: 0 })
-  const current = useRef({ x: 0, y: 0 })
+type Particle = {
+  x: number
+  y: number
+  vx: number
+  vy: number
+  size: number
+}
+
+export function MagneticDust() {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const mouse = useRef({ x: 0, y: 0, active: false })
+  const particles = useRef<Particle[]>([])
+  const raf = useRef<number | null>(null)
 
   useEffect(() => {
-    const move = (e: MouseEvent) => {
-      mouse.current = { x: e.clientX, y: e.clientY }
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    const resize = () => {
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
+      initParticles()
     }
 
-    window.addEventListener('mousemove', move)
+    const initParticles = () => {
+      // 🌿 more spacing = fewer particles
+      const count = Math.floor((window.innerWidth * window.innerHeight) / 32000)
 
-    let animation: number
+      particles.current = Array.from({ length: count }, () => ({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        vx: (Math.random() - 0.5) * 0.25,
+        vy: (Math.random() - 0.5) * 0.25,
+        size: Math.random() * 1.4 + 0.7,
+      }))
+    }
+
+    const onMove = (e: MouseEvent) => {
+      mouse.current = { x: e.clientX, y: e.clientY, active: true }
+    }
+
+    const onLeave = () => {
+      mouse.current.active = false
+    }
+
+    window.addEventListener('resize', resize)
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseleave', onLeave)
+
+    resize()
 
     const animate = () => {
-      if (!blobRef.current) return
+      if (!ctx) return
 
-      // smooth follow (THE MAGIC)
-      current.current.x += (mouse.current.x - current.current.x) * 0.08
-      current.current.y += (mouse.current.y - current.current.y) * 0.08
+      // IMPORTANT: fully transparent background
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-      blobRef.current.style.transform =
-        `translate(${current.current.x - 200}px, ${current.current.y - 200}px)`
+      for (const p of particles.current) {
+        if (mouse.current.active) {
+          const dx = mouse.current.x - p.x
+          const dy = mouse.current.y - p.y
+          const dist = Math.sqrt(dx * dx + dy * dy)
 
-      animation = requestAnimationFrame(animate)
+          // 🧲 REPULSION FIELD
+          if (dist < 180) {
+            const force = (180 - dist) / 180
+
+            // normalize direction
+            const nx = dx / (dist || 1)
+            const ny = dy / (dist || 1)
+
+            // push away from mouse
+            p.vx -= nx * force * 0.12
+            p.vy -= ny * force * 0.12
+          }
+        }
+
+        // damping (smooth, premium feel)
+        p.vx *= 0.92
+        p.vy *= 0.92
+
+        p.x += p.vx
+        p.y += p.vy
+
+        // wrap edges
+        if (p.x < 0) p.x = canvas.width
+        if (p.x > canvas.width) p.x = 0
+        if (p.y < 0) p.y = canvas.height
+        if (p.y > canvas.height) p.y = 0
+
+        // 🌿 dark green particles
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
+        ctx.fillStyle = 'rgba(5, 35, 25, 0.9)'
+        ctx.fill()
+      }
+
+      raf.current = requestAnimationFrame(animate)
     }
 
     animate()
 
     return () => {
-      window.removeEventListener('mousemove', move)
-      cancelAnimationFrame(animation)
+      window.removeEventListener('resize', resize)
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseleave', onLeave)
+      if (raf.current) cancelAnimationFrame(raf.current)
     }
   }, [])
 
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-      <div
-        ref={blobRef}
-        style={{
-          position: 'absolute',
-          width: '420px',
-          height: '420px',
-          background: 'rgba(232,98,26,0.16)',
-          filter: 'blur(50px)',
-          borderRadius: '50%',
-        }}
-      />
-    </div>
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 pointer-events-none z-0"
+    />
   )
 }
