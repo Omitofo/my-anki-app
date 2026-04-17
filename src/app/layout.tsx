@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { Providers } from './providers'
-import { MagneticDust } from '@/components/ui/AnimatedBackground'
+import { BackgroundProvider } from '@/components/ui/BackgroundProvider'
 
 export const metadata: Metadata = {
   title: 'Kardu — Language Flashcards',
@@ -14,11 +14,15 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <MagneticDust />
+        <BackgroundProvider />
         <div className="relative z-10">
           <Providers>{children}</Providers>
         </div>
