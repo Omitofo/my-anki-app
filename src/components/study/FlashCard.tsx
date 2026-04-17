@@ -25,7 +25,7 @@ export function FlashCard({ card }: FlashCardProps) {
       }}
     >
       {/* FIXED HEIGHT WRAPPER (no padding hacks) */}
-      <div className="relative w-full h-[420px] sm:h-[500px]">
+      <div className="relative w-full h-[320px] sm:h-[400px]">
         
         {/* INNER FLIP CONTAINER */}
         <div className={`card-inner w-full h-full ${isFlipped ? 'flipped' : ''}`}>
