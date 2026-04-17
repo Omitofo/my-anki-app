@@ -76,8 +76,8 @@ export function MagneticDust() {
             const ny = dy / (dist || 1)
 
             // push away from mouse
-            p.vx -= nx * force * 0.12
-            p.vy -= ny * force * 0.12
+            p.vx -= nx * force * 0.15
+            p.vy -= ny * force * 0.15
           }
         }
 
