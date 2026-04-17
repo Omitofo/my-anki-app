@@ -25,3 +25,13 @@ export async function getDomainBySlug(slug: string): Promise<ApiResponse<Domain>
     error: error?.message ?? null,
   }
 }
+
+export async function getLanguagesByDomain(domainId: string) {
+  const { data, error } = await db
+    .from('languages')
+    .select('*')
+    .eq('domain_id', domainId)
+    .order('name')
+
+  return { data: data ?? null, error: error?.message ?? null }
+}
