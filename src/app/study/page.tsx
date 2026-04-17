@@ -1,7 +1,7 @@
 'use client'
 
 import { useStudyStore } from '@/store/studyStore'
-import { Breadcrumb } from '@/components/navigation/Breadcrumb'
+import { Breadcrumb } from '@/components/navigation/BreadCrumb'
 import { DomainSelector } from '@/components/navigation/DomainSelector'
 import { LanguageSelector } from '@/components/navigation/LanguageSelector'
 import { CategorySelector } from '@/components/navigation/CategorySelector'
