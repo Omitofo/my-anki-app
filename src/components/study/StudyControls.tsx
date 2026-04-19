@@ -1,5 +1,7 @@
 'use client'
 
+// src/components/study/StudyControls.tsx
+
 import { useStudyStore } from '@/store/studyStore'
 import { Button } from '@/components/ui/Button'
 import { ProgressBar } from '@/components/ui/ProgressBar'
@@ -19,12 +21,17 @@ export function StudyControls({
   progress,
   isTransitioning,
 }: StudyControlsProps) {
-  const { isFlipped, flipCard, nextCard, resetSession } = useStudyStore()
+  const historyIndex = useStudyStore((s) => s.historyIndex)
+  const prevCard     = useStudyStore((s) => s.prevCard)
+  const nextCard     = useStudyStore((s) => s.nextCard)
+  const resetSession = useStudyStore((s) => s.resetSession)
+
+  const canGoPrev = historyIndex > 0
 
   return (
-    <div className="flex flex-col gap-5 w-full">
-      {/* Progress */}
-      <div className="flex items-center gap-4">
+    <div className="flex flex-col gap-4 w-full">
+      {/* Progress bar */}
+      <div className="flex items-center gap-3">
         <ProgressBar value={progress} showLabel className="flex-1" />
         <span className="text-xs text-mist font-mono whitespace-nowrap tabular-nums">
           {seenCount} / {totalCards}
@@ -32,23 +39,24 @@ export function StudyControls({
       </div>
 
       {/* Controls */}
-      <div className="flex items-center justify-center gap-3 flex-wrap">
+      <div className="flex items-center justify-center gap-2">
         <Button
           variant="secondary"
-          size="md"
-          onClick={flipCard}
-          className="min-w-[120px]"
-          aria-label="Flip card"
+          size="sm"
+          onClick={prevCard}
+          disabled={!canGoPrev || isTransitioning}
+          className="min-w-[84px]"
+          aria-label="Previous card"
         >
-          <span>{isFlipped ? '👁️ Front' : '👁️ Reveal'}</span>
+          ← Prev
         </Button>
 
         <Button
           variant="primary"
-          size="md"
+          size="sm"
           onClick={nextCard}
           disabled={isTransitioning}
-          className="min-w-[120px]"
+          className="min-w-[84px]"
           aria-label="Next card"
         >
           Next →
@@ -58,14 +66,14 @@ export function StudyControls({
           variant="ghost"
           size="sm"
           onClick={resetSession}
-          aria-label="Reset session"
-          title="Reset session"
+          aria-label="Restart session"
+          title="Restart from beginning"
+          className="px-2.5"
         >
           ↺
         </Button>
       </div>
 
-      {/* Session counter */}
       {sessionCount > 0 && (
         <p className="text-center text-xs text-mist/50 font-mono">
           {sessionCount} card{sessionCount !== 1 ? 's' : ''} reviewed this session

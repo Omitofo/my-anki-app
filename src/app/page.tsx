@@ -1,4 +1,6 @@
+// src/app/page.tsx
 import Link from 'next/link'
+import { HeroDeck } from '@/components/home/HeroDeck'
 
 export default function HomePage() {
   return (
@@ -18,29 +20,19 @@ export default function HomePage() {
 
       {/* Hero */}
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-20 text-center gap-8">
-        {/* Floating cards illustration */}
-        <div className="relative w-64 h-48 sm:w-80 sm:h-56 mb-4" aria-hidden>
-          {/* Back cards */}
-          <div className="absolute left-4 top-6 w-44 sm:w-52 h-32 sm:h-36 bg-paper-card rounded-2xl border border-mist/20 shadow-md rotate-[-8deg] opacity-40" />
-          <div className="absolute left-8 top-3 w-44 sm:w-52 h-32 sm:h-36 bg-paper-card rounded-2xl border border-mist/20 shadow-md rotate-[-4deg] opacity-70" />
-          {/* Front card */}
-          <div className="absolute left-6 top-0 w-44 sm:w-52 h-32 sm:h-36 bg-paper-card rounded-2xl border border-mist/15 shadow-xl flex flex-col items-center justify-center gap-2 animate-float">
-            <div className="h-0.5 w-12 bg-accent rounded-full" />
-            <p className="font-display text-3xl text-ink">こんにちは</p>
-            <p className="text-xs text-mist">Hello</p>
-          </div>
-        </div>
+        {/* Animated card — cycles through domain themes */}
+        <HeroDeck />
 
         {/* Headline */}
         <div className="max-w-xl">
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl text-ink leading-tight mb-4">
-            Learn any language,
+            Learn anything,
             <br />
             <span className="text-accent italic">one card at a time.</span>
           </h1>
           <p className="text-mist text-base sm:text-lg leading-relaxed max-w-md mx-auto">
-            Kardu is a clean, distraction-free flashcard app for language learners.
-            Study vocabulary, grammar, and phrases at your own pace.
+            Kardu is a clean, distraction-free study app. Languages, history,
+            economics and more — flashcards or quizzes, at your own pace.
           </p>
         </div>
 
@@ -53,12 +45,24 @@ export default function HomePage() {
           <span aria-hidden>→</span>
         </Link>
 
-        {/* Features */}
+        {/* Feature cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-2xl w-full mt-8 text-left">
           {[
-            { icon: '🃏', title: 'Smart shuffle', desc: 'See every card before repeats' },
-            { icon: '⌨️', title: 'Keyboard first', desc: 'Space to flip, arrow to next' },
-            { icon: '🌐', title: 'Any language', desc: 'Japanese, Spanish, German & more' },
+            {
+              icon: '🃏',
+              title: 'Smart shuffle',
+              desc: 'See every card before repeats. Navigate back with ← Prev.',
+            },
+            {
+              icon: '🎯',
+              title: 'Flashcards & quizzes',
+              desc: 'Flip-to-reveal decks or 4-option multiple choice — per deck.',
+            },
+            {
+              icon: '🌐',
+              title: 'Any subject',
+              desc: 'Languages, history, economics, science — one system for all.',
+            },
           ].map((f) => (
             <div key={f.title} className="bg-paper-card rounded-2xl p-5 border border-mist/10">
               <span className="text-2xl block mb-2">{f.icon}</span>

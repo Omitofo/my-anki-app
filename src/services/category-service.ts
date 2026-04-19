@@ -1,15 +1,12 @@
+// src/services/category-service.ts
 import { db } from '@/db/client'
 import type { Category, ApiResponse } from '@/types'
 
-export async function getCategoriesByLanguage(languageId: string): Promise<ApiResponse<Category[]>> {
+export async function getCategoriesBySection(sectionId: string): Promise<ApiResponse<Category[]>> {
   const { data, error } = await db
     .from('categories')
     .select('*')
-    .eq('language_id', languageId)
+    .eq('section_id', sectionId)
     .order('name')
-
-  return {
-    data: data ?? null,
-    error: error?.message ?? null,
-  }
+  return { data: data ?? null, error: error?.message ?? null }
 }

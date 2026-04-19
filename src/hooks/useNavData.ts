@@ -1,7 +1,8 @@
+// src/hooks/useNavData.ts
 import { useQuery } from '@tanstack/react-query'
 import { getDomains } from '@/services/domain-service'
-import { getLanguagesByDomain } from '@/services/language-service'
-import { getCategoriesByLanguage } from '@/services/category-service'
+import { getSectionsByDomain } from '@/services/section-service'
+import { getCategoriesBySection } from '@/services/category-service'
 import { getDecksByCategory } from '@/services/deck-service'
 
 export function useDomains() {
@@ -16,11 +17,11 @@ export function useDomains() {
   })
 }
 
-export function useLanguages(domainId: string | null) {
+export function useSections(domainId: string | null) {
   return useQuery({
-    queryKey: ['languages', domainId],
+    queryKey: ['sections', domainId],
     queryFn: async () => {
-      const res = await getLanguagesByDomain(domainId!)
+      const res = await getSectionsByDomain(domainId!)
       if (res.error) throw new Error(res.error)
       return res.data ?? []
     },
@@ -29,15 +30,15 @@ export function useLanguages(domainId: string | null) {
   })
 }
 
-export function useCategories(languageId: string | null) {
+export function useCategories(sectionId: string | null) {
   return useQuery({
-    queryKey: ['categories', languageId],
+    queryKey: ['categories', sectionId],
     queryFn: async () => {
-      const res = await getCategoriesByLanguage(languageId!)
+      const res = await getCategoriesBySection(sectionId!)
       if (res.error) throw new Error(res.error)
       return res.data ?? []
     },
-    enabled: !!languageId,
+    enabled: !!sectionId,
     staleTime: 10 * 60 * 1000,
   })
 }

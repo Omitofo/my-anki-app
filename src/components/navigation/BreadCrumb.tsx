@@ -1,3 +1,4 @@
+// src/components/navigation/BreadCrumb.tsx
 'use client'
 
 import { useStudyStore } from '@/store/studyStore'
@@ -10,15 +11,13 @@ export function Breadcrumb() {
     { label: 'Home', active: nav.level === 'domain', onClick: resetNav },
     nav.domain && {
       label: nav.domain.name,
-      active: nav.level === 'language',
+      active: nav.level === 'section',
       onClick: () => useStudyStore.getState().setDomain(nav.domain!),
     },
-    nav.language && {
-      label: nav.language.flag
-        ? `${nav.language.flag} ${nav.language.name}`
-        : nav.language.name,
+    nav.section && {
+      label: nav.section.icon ? `${nav.section.icon} ${nav.section.name}` : nav.section.name,
       active: nav.level === 'category',
-      onClick: () => useStudyStore.getState().setLanguage(nav.language!),
+      onClick: () => useStudyStore.getState().setSection(nav.section!),
     },
     nav.category && {
       label: nav.category.name,
@@ -34,18 +33,15 @@ export function Breadcrumb() {
 
   if (crumbs.length <= 1) return null
 
-  // On mobile: show only last 2 crumbs with a leading ellipsis if deeper
-  // On desktop: show all
-  const visibleCrumbs = crumbs
   const mobileStart = Math.max(0, crumbs.length - 2)
   const mobileCrumbs = crumbs.slice(mobileStart)
   const hasHidden = mobileStart > 0
 
   return (
     <nav aria-label="Breadcrumb" className="flex items-center min-w-0 max-w-full">
-      {/* Desktop: full breadcrumb */}
+      {/* Desktop */}
       <ol className="hidden sm:flex items-center gap-1.5 flex-wrap">
-        {visibleCrumbs.map((crumb, i) => (
+        {crumbs.map((crumb, i) => (
           <li key={i} className="flex items-center gap-1.5">
             {i > 0 && <span className="text-mist/50 text-xs select-none">›</span>}
             <button
@@ -63,7 +59,7 @@ export function Breadcrumb() {
         ))}
       </ol>
 
-      {/* Mobile: truncated — show ellipsis + last 2 */}
+      {/* Mobile */}
       <ol className="flex sm:hidden items-center gap-1 min-w-0 max-w-full">
         {hasHidden && (
           <li className="flex items-center gap-1 shrink-0">
@@ -73,9 +69,7 @@ export function Breadcrumb() {
         )}
         {mobileCrumbs.map((crumb, i) => (
           <li key={i} className="flex items-center gap-1 min-w-0">
-            {(i > 0 || hasHidden) && i > 0 && (
-              <span className="text-mist/50 text-xs shrink-0">›</span>
-            )}
+            {i > 0 && <span className="text-mist/50 text-xs shrink-0">›</span>}
             <button
               onClick={crumb.active ? undefined : crumb.onClick}
               className={cn(

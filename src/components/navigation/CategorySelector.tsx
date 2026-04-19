@@ -1,3 +1,4 @@
+// src/components/navigation/CategorySelector.tsx
 'use client'
 
 import { useCategories } from '@/hooks/useNavData'
@@ -7,21 +8,26 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import type { Category } from '@/types'
 
 const CATEGORY_ICONS: Record<string, string> = {
-  vocabulary: '📖',
-  grammar: '✏️',
-  phrases: '💬',
-  scenarios: '🎭',
-  kanji: '字',
-  hiragana: 'あ',
-  katakana: 'ア',
-  numbers: '🔢',
-  default: '📚',
+  vocabulary:    '📖',
+  grammar:       '✏️',
+  phrases:       '💬',
+  scenarios:     '🎭',
+  kanji:         '字',
+  hiragana:      'あ',
+  katakana:      'ア',
+  numbers:       '🔢',
+  'key-events':  '📅',
+  people:        '👤',
+  economics:     '📊',
+  fundamentals:  '🔑',
+  formulas:      '🧮',
+  default:       '📚',
 }
 
 export function CategorySelector() {
-  const language = useStudyStore((s) => s.nav.language)
+  const section = useStudyStore((s) => s.nav.section)
   const setCategory = useStudyStore((s) => s.setCategory)
-  const { data: categories, isLoading } = useCategories(language?.id ?? null)
+  const { data: categories, isLoading } = useCategories(section?.id ?? null)
 
   if (isLoading) return <GridSkeleton count={4} />
 
@@ -30,7 +36,7 @@ export function CategorySelector() {
       <EmptyState
         icon="📂"
         title="No categories yet"
-        description="Add categories under this language in Supabase."
+        description="Add categories under this section in Supabase."
       />
     )
   }

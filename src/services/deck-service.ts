@@ -1,3 +1,4 @@
+// src/services/deck-service.ts
 import { db } from '@/db/client'
 import type { Deck, ApiResponse } from '@/types'
 
@@ -7,11 +8,7 @@ export async function getDecksByCategory(categoryId: string): Promise<ApiRespons
     .select('*')
     .eq('category_id', categoryId)
     .order('name')
-
-  return {
-    data: data ?? null,
-    error: error?.message ?? null,
-  }
+  return { data: data ?? null, error: error?.message ?? null }
 }
 
 export async function getDeckById(id: string): Promise<ApiResponse<Deck>> {
@@ -20,9 +17,5 @@ export async function getDeckById(id: string): Promise<ApiResponse<Deck>> {
     .select('*')
     .eq('id', id)
     .single()
-
-  return {
-    data: data ?? null,
-    error: error?.message ?? null,
-  }
+  return { data: data ?? null, error: error?.message ?? null }
 }
