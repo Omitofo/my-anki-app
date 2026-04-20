@@ -22,19 +22,29 @@ export function FlashCard({ card }: FlashCardProps) {
       role="button"
       aria-label={isFlipped ? 'Card back — tap to see front' : 'Card front — tap to reveal'}
     >
-      {/* Smaller fixed height */}
       <div className="relative w-full h-[240px] sm:h-[300px]">
         <div className={`card-inner w-full h-full ${isFlipped ? 'flipped' : ''}`}>
 
           {/* ── FRONT ── */}
           <div className="card-face">
             <div className="h-full bg-paper-card border border-mist/10 rounded-2xl shadow-lg overflow-hidden noise-overlay flex flex-col">
-              <div className="h-0.5 bg-gradient-to-r from-accent via-accent-light to-amber-400" />
+              {/* Top accent bar */}
+              <div className="h-0.5 bg-gradient-to-r from-accent via-accent-light to-amber-400 shrink-0" />
 
-              <div className="flex-1 flex flex-col items-center justify-center px-6 py-5 gap-3">
+              {/* Label row — always at top */}
+              <div className="flex items-center justify-between px-5 pt-3 pb-0 shrink-0">
                 <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-mist/50">
                   Front
                 </span>
+                <Badge
+                  variant={card.difficulty <= 2 ? 'sage' : card.difficulty >= 4 ? 'accent' : 'mist'}
+                >
+                  {formatDifficulty(card.difficulty)}
+                </Badge>
+              </div>
+
+              {/* Centered content area */}
+              <div className="flex-1 flex flex-col items-center justify-center px-6 py-3 gap-2">
                 <p className="font-display text-2xl sm:text-3xl text-ink text-center leading-snug">
                   {card.front}
                 </p>
@@ -43,12 +53,8 @@ export function FlashCard({ card }: FlashCardProps) {
                 )}
               </div>
 
-              <div className="flex items-center justify-between px-5 pb-4">
-                <Badge
-                  variant={card.difficulty <= 2 ? 'sage' : card.difficulty >= 4 ? 'accent' : 'mist'}
-                >
-                  {formatDifficulty(card.difficulty)}
-                </Badge>
+              {/* Bottom hint */}
+              <div className="flex items-center justify-end px-5 pb-3 shrink-0">
                 <span className="text-[10px] text-mist/40 italic">tap to reveal</span>
               </div>
             </div>
@@ -57,18 +63,24 @@ export function FlashCard({ card }: FlashCardProps) {
           {/* ── BACK ── */}
           <div className="card-face card-back-face">
             <div className="h-full bg-ink border border-ink-soft rounded-2xl shadow-lg overflow-hidden flex flex-col">
-              <div className="h-0.5 bg-gradient-to-r from-sage via-sage-light to-emerald-400" />
+              {/* Top accent bar */}
+              <div className="h-0.5 bg-gradient-to-r from-sage via-sage-light to-emerald-400 shrink-0" />
 
-              <div className="flex-1 flex flex-col items-center justify-center px-6 py-5 gap-3">
+              {/* Label row — always at top */}
+              <div className="px-5 pt-3 pb-0 shrink-0">
                 <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-mist/40">
                   Back
                 </span>
+              </div>
+
+              {/* Centered content area */}
+              <div className="flex-1 flex flex-col items-center justify-center px-6 py-3 gap-3">
                 <p className="font-display text-2xl sm:text-3xl text-paper text-center leading-snug">
                   {card.back}
                 </p>
 
                 {card.example && (
-                  <div className="mt-2 bg-ink-soft rounded-xl px-4 py-2.5 max-w-s w-full">
+                  <div className="bg-ink-soft rounded-xl px-4 py-2.5 max-w-full w-full">
                     <p className="text-[10px] text-mist/60 uppercase tracking-widest mb-1 font-mono text-center">
                       Example
                     </p>
@@ -82,8 +94,9 @@ export function FlashCard({ card }: FlashCardProps) {
                 )}
               </div>
 
+              {/* Bottom notes */}
               {card.notes && (
-                <div className="px-7 pb-4">
+                <div className="px-5 pb-3 shrink-0">
                   <p className="text-[10px] text-mist/40 italic text-center">💡 {card.notes}</p>
                 </div>
               )}

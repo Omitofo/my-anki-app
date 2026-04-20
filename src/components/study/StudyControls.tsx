@@ -3,8 +3,8 @@
 // src/components/study/StudyControls.tsx
 
 import { useStudyStore } from '@/store/studyStore'
-import { Button } from '@/components/ui/Button'
 import { ProgressBar } from '@/components/ui/ProgressBar'
+import { cn } from '@/lib/utils'
 
 interface StudyControlsProps {
   totalCards: number
@@ -22,11 +22,16 @@ export function StudyControls({
   isTransitioning,
 }: StudyControlsProps) {
   const historyIndex = useStudyStore((s) => s.historyIndex)
+  const history      = useStudyStore((s) => s.history)
   const prevCard     = useStudyStore((s) => s.prevCard)
   const nextCard     = useStudyStore((s) => s.nextCard)
   const resetSession = useStudyStore((s) => s.resetSession)
 
   const canGoPrev = historyIndex > 0
+  const canGoNext = !(historyIndex === history.length - 1 && seenCount >= totalCards)
+
+  const prevDisabled = !canGoPrev || isTransitioning
+  const nextDisabled = !canGoNext || isTransitioning
 
   return (
     <div className="flex flex-col gap-4 w-full">
@@ -40,38 +45,42 @@ export function StudyControls({
 
       {/* Controls */}
       <div className="flex items-center justify-center gap-2">
-        <Button
-          variant="secondary"
-          size="sm"
+        <button
           onClick={prevCard}
-          disabled={!canGoPrev || isTransitioning}
-          className="min-w-[84px]"
+          disabled={prevDisabled}
           aria-label="Previous card"
+          className={cn(
+            'min-w-[84px] px-4 py-2 rounded-xl text-sm font-body font-medium border transition-all duration-200',
+            prevDisabled
+              ? 'border-mist/10 bg-paper/40 text-mist/25 cursor-not-allowed opacity-50'
+              : 'border-mist/30 bg-paper-card text-ink hover:border-mist hover:bg-paper-warm active:scale-[0.97] cursor-pointer'
+          )}
         >
           ← Prev
-        </Button>
+        </button>
 
-        <Button
-          variant="primary"
-          size="sm"
+        <button
           onClick={nextCard}
-          disabled={isTransitioning}
-          className="min-w-[84px]"
+          disabled={nextDisabled}
           aria-label="Next card"
+          className={cn(
+            'min-w-[84px] px-4 py-2 rounded-xl text-sm font-body font-medium transition-all duration-200',
+            nextDisabled
+              ? 'bg-ink/15 text-paper/30 cursor-not-allowed opacity-50'
+              : 'bg-ink text-paper hover:bg-ink-soft active:scale-[0.97] shadow-sm hover:shadow-md cursor-pointer'
+          )}
         >
           Next →
-        </Button>
+        </button>
 
-        <Button
-          variant="ghost"
-          size="sm"
+        <button
           onClick={resetSession}
           aria-label="Restart session"
           title="Restart from beginning"
-          className="px-2.5"
+          className="px-3 py-2 rounded-xl text-sm font-body font-medium text-mist hover:text-ink hover:bg-paper-warm active:scale-[0.97] transition-all duration-200 cursor-pointer"
         >
           ↺
-        </Button>
+        </button>
       </div>
 
       {sessionCount > 0 && (

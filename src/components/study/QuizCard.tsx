@@ -30,7 +30,6 @@ interface Particle {
 
 function rnd(a: number, b: number) { return a + Math.random() * (b - a) }
 
-// cancelRef lets the parent kill the animation before it naturally ends
 function FullScreenConfetti({
   onDone,
   cancelRef,
@@ -68,7 +67,6 @@ function FullScreenConfetti({
     let cancelled = false
     const DURATION = 2.6
 
-    // Expose cancel function to parent via ref
     cancelRef.current = () => {
       cancelled = true
       cancelAnimationFrame(raf)
@@ -148,8 +146,8 @@ interface QuizCardProps {
   card: CardWithOptions
   onNext: () => void
   onPrev: () => void
-  canGoPrev: boolean    // first card  → false → Prev disabled
-  isLastCard: boolean   // last card   → true  → Next disabled
+  canGoPrev: boolean
+  isLastCard: boolean
   isTransitioning: boolean
   sessionCount: number
   seenCount: number
@@ -168,7 +166,6 @@ export function QuizCard({
   const [state, setState]               = useState<AnswerState>('idle')
   const [showConfetti, setShowConfetti] = useState(false)
 
-  // Ref to cancel in-progress confetti when the user navigates
   const confettiCancelRef = useRef<(() => void) | null>(null)
 
   const stopConfetti = useCallback(() => {
@@ -179,7 +176,6 @@ export function QuizCard({
     setShowConfetti(false)
   }, [])
 
-  // Reset on card change — also kill any running confetti
   useEffect(() => {
     stopConfetti()
     setSelected(null)
@@ -225,13 +221,12 @@ export function QuizCard({
 
   const letters = ['A', 'B', 'C', 'D']
 
-  // Button states
+  // Disabled states
   const prevDisabled = !canGoPrev || isTransitioning
   const nextDisabled = isLastCard || isTransitioning
 
   return (
     <>
-      {/* Full-screen confetti portal */}
       {showConfetti && typeof document !== 'undefined' &&
         createPortal(
           <FullScreenConfetti
@@ -347,17 +342,18 @@ export function QuizCard({
         {/* ── Controls ── */}
         <div className="flex items-center justify-between gap-3">
 
-          {/* Prev — disabled on first card */}
+          {/* Prev — clearly disabled on first card */}
           <button
             onClick={handlePrev}
             disabled={prevDisabled}
             className={cn(
-              'px-4 py-2 rounded-xl text-sm font-body font-medium border transition-all duration-200',
+              'px-4 py-2 rounded-xl text-sm font-body font-medium border transition-all duration-200 flex items-center gap-1.5',
               !prevDisabled
-                ? 'border-mist/30 text-ink hover:border-mist hover:bg-paper-warm active:scale-[0.97]'
-                : 'border-mist/10 text-mist/20 cursor-not-allowed bg-paper/40'
+                ? 'border-mist/30 text-ink hover:border-mist hover:bg-paper-warm active:scale-[0.97] cursor-pointer'
+                : 'border-mist/8 text-mist/25 cursor-not-allowed bg-paper-warm/30 opacity-40 pointer-events-none'
             )}
             aria-label="Previous question"
+            aria-disabled={prevDisabled}
           >
             ← Prev
           </button>
@@ -366,17 +362,18 @@ export function QuizCard({
             <span className="text-xs text-mist/40 font-mono">{sessionCount} answered</span>
           )}
 
-          {/* Next — disabled on last card */}
+          {/* Next — clearly disabled on last card */}
           <button
             onClick={handleNext}
             disabled={nextDisabled}
             className={cn(
-              'px-4 py-2 rounded-xl text-sm font-body font-medium transition-all duration-200',
+              'px-4 py-2 rounded-xl text-sm font-body font-medium transition-all duration-200 flex items-center gap-1.5',
               !nextDisabled
-                ? 'bg-ink text-paper hover:bg-ink-soft active:scale-[0.97] shadow-sm'
-                : 'bg-ink/20 text-paper/40 cursor-not-allowed'
+                ? 'bg-ink text-paper hover:bg-ink-soft active:scale-[0.97] shadow-sm cursor-pointer'
+                : 'bg-ink/8 text-mist/25 cursor-not-allowed border border-mist/10 opacity-40 pointer-events-none'
             )}
             aria-label="Next question"
+            aria-disabled={nextDisabled}
           >
             Next →
           </button>
