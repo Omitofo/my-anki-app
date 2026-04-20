@@ -1,0 +1,363 @@
+# Kardu — Supabase SQL Reference
+
+> Copy-paste guide for adding, modifying, and deleting content.
+> Give this file to any AI as context when you need help with queries.
+
+---
+
+## Table Structure
+
+```
+domains
+  └─ sections          (domain_id → domains.id)
+       └─ categories   (section_id → sections.id)
+            └─ decks   (category_id → categories.id)
+                 └─ cards        (deck_id → decks.id)
+                      └─ quiz_options  (card_id → cards.id)
+```
+
+---
+
+## Schema Reference
+
+### domains
+| Column     | Type        | Notes                  |
+|------------|-------------|------------------------|
+| id         | UUID PK     | auto-generated         |
+| name       | TEXT        | e.g. "Languages"       |
+| slug       | TEXT UNIQUE | e.g. "languages"       |
+| created_at | TIMESTAMPTZ | auto                   |
+
+### sections
+| Column     | Type        | Notes                            |
+|------------|-------------|----------------------------------|
+| id         | UUID PK     | auto-generated                   |
+| domain_id  | UUID FK     | → domains.id (CASCADE DELETE)    |
+| name       | TEXT        | e.g. "Japanese"                  |
+| slug       | TEXT        | unique per domain                |
+| icon       | TEXT        | emoji e.g. "🇯🇵"                 |
+| created_at | TIMESTAMPTZ | auto                             |
+
+### categories
+| Column     | Type        | Notes                             |
+|------------|-------------|-----------------------------------|
+| id         | UUID PK     | auto-generated                    |
+| section_id | UUID FK     | → sections.id (CASCADE DELETE)    |
+| name       | TEXT        | e.g. "Vocabulary"                 |
+| slug       | TEXT        | unique per section                |
+| created_at | TIMESTAMPTZ | auto                              |
+
+### decks
+| Column      | Type        | Notes                                     |
+|-------------|-------------|-------------------------------------------|
+| id          | UUID PK     | auto-generated                            |
+| category_id | UUID FK     | → categories.id (CASCADE DELETE)          |
+| name        | TEXT        | e.g. "JLPT N5 Core Words"                |
+| description | TEXT        | optional                                  |
+| deck_type   | TEXT        | 'flashcard' or 'quiz' (default flashcard) |
+| created_at  | TIMESTAMPTZ | auto                                      |
+
+### cards
+| Column              | Type        | Notes                            |
+|---------------------|-------------|----------------------------------|
+| id                  | UUID PK     | auto-generated                   |
+| deck_id             | UUID FK     | → decks.id (CASCADE DELETE)      |
+| front               | TEXT        | question / word shown on front   |
+| back                | TEXT        | answer / translation on back     |
+| translation         | TEXT        | romanization or short gloss      |
+| example             | TEXT        | example sentence (use \n for newlines) |
+| example_translation | TEXT        | translation of example           |
+| notes               | TEXT        | grammar tip, memory hook, etc.   |
+| difficulty          | INT 1–5     | 1 = beginner, 5 = expert         |
+| created_at          | TIMESTAMPTZ | auto                             |
+| updated_at          | TIMESTAMPTZ | auto-updated by trigger          |
+
+### quiz_options
+| Column     | Type        | Notes                          |
+|------------|-------------|--------------------------------|
+| id         | UUID PK     | auto-generated                 |
+| card_id    | UUID FK     | → cards.id (CASCADE DELETE)    |
+| text       | TEXT        | the option text                |
+| is_correct | BOOLEAN     | exactly one should be true     |
+| position   | INT         | display order 0–3              |
+| created_at | TIMESTAMPTZ | auto                           |
+
+---
+
+## Finding IDs
+
+```sql
+-- List all domains
+SELECT id, name, slug FROM domains ORDER BY name;
+
+-- List all sections under a domain
+SELECT s.id, s.name, s.slug, s.icon
+FROM sections s JOIN domains d ON s.domain_id = d.id
+WHERE d.slug = 'languages'
+ORDER BY s.name;
+
+-- List all categories under a section
+SELECT c.id, c.name, c.slug
+FROM categories c JOIN sections s ON c.section_id = s.id
+JOIN domains d ON s.domain_id = d.id
+WHERE d.slug = 'languages' AND s.slug = 'japanese'
+ORDER BY c.name;
+
+-- List all decks under a category
+SELECT dk.id, dk.name, dk.deck_type
+FROM decks dk JOIN categories c ON dk.category_id = c.id
+JOIN sections s ON c.section_id = s.id
+JOIN domains d ON s.domain_id = d.id
+WHERE d.slug = 'languages' AND s.slug = 'japanese' AND c.slug = 'vocabulary'
+ORDER BY dk.name;
+
+-- List all cards in a deck (by deck name)
+SELECT cards.id, cards.front, cards.back, cards.difficulty
+FROM cards JOIN decks dk ON cards.deck_id = dk.id
+WHERE dk.name = 'JLPT N5 — Core Words'
+ORDER BY cards.created_at;
+
+-- Full tree overview
+SELECT
+  d.name AS domain, s.name AS section, c.name AS category,
+  dk.name AS deck, dk.deck_type,
+  COUNT(DISTINCT cards.id) AS cards,
+  COUNT(DISTINCT qo.id)    AS quiz_options
+FROM decks dk
+JOIN categories c   ON dk.category_id = c.id
+JOIN sections s     ON c.section_id   = s.id
+JOIN domains d      ON s.domain_id    = d.id
+LEFT JOIN cards     ON cards.deck_id  = dk.id
+LEFT JOIN quiz_options qo ON qo.card_id = cards.id
+GROUP BY d.name, s.name, c.name, dk.name, dk.deck_type
+ORDER BY d.name, s.name, c.name;
+```
+
+---
+
+## Adding Content
+
+### Add a domain
+```sql
+INSERT INTO domains (name, slug)
+VALUES ('Science', 'science');
+```
+
+### Add a section (under a domain)
+```sql
+INSERT INTO sections (domain_id, name, slug, icon)
+SELECT id, 'Biology', 'biology', '🧬'
+FROM domains WHERE slug = 'science';
+```
+
+### Add a category (under a section)
+```sql
+INSERT INTO categories (section_id, name, slug)
+SELECT s.id, 'Cell Biology', 'cell-biology'
+FROM sections s JOIN domains d ON s.domain_id = d.id
+WHERE d.slug = 'science' AND s.slug = 'biology';
+```
+
+### Add a flashcard deck
+```sql
+INSERT INTO decks (category_id, name, description, deck_type)
+SELECT c.id, 'Cell Organelles', 'Structure and function of organelles', 'flashcard'
+FROM categories c JOIN sections s ON c.section_id = s.id
+JOIN domains d ON s.domain_id = d.id
+WHERE d.slug = 'science' AND s.slug = 'biology' AND c.slug = 'cell-biology';
+```
+
+### Add a quiz deck
+```sql
+INSERT INTO decks (category_id, name, description, deck_type)
+SELECT c.id, 'Cell Biology Quiz', 'Test your knowledge', 'quiz'
+FROM categories c JOIN sections s ON c.section_id = s.id
+JOIN domains d ON s.domain_id = d.id
+WHERE d.slug = 'science' AND s.slug = 'biology' AND c.slug = 'cell-biology';
+```
+
+### Add multiple flashcard cards (CROSS JOIN VALUES pattern)
+```sql
+INSERT INTO cards (deck_id, front, back, translation, example, example_translation, notes, difficulty)
+SELECT d.id, t.front, t.back, t.translation, t.example, t.example_translation, t.notes, t.difficulty
+FROM decks d
+JOIN categories c ON d.category_id = c.id
+JOIN sections s   ON c.section_id  = s.id
+JOIN domains dm   ON s.domain_id   = dm.id
+CROSS JOIN (VALUES
+  ('Mitochondria', 'The powerhouse of the cell',
+   NULL,
+   'Mitochondria produce ATP via cellular respiration.',
+   NULL,
+   'Has its own DNA — evidence of ancient endosymbiosis.', 2),
+  ('Nucleus', 'Control centre of the cell — contains DNA',
+   NULL,
+   'The nucleus directs cell activity and houses chromosomes.',
+   NULL,
+   'Surrounded by the nuclear envelope with pores for mRNA export.', 1)
+) AS t(front, back, translation, example, example_translation, notes, difficulty)
+WHERE dm.slug = 'science' AND s.slug = 'biology' AND d.name = 'Cell Organelles';
+```
+
+### Add a single flashcard card
+```sql
+INSERT INTO cards (deck_id, front, back, notes, difficulty)
+SELECT id, 'Ribosome', 'Site of protein synthesis',
+  'Found free in cytoplasm or on rough ER. No membrane.', 2
+FROM decks WHERE name = 'Cell Organelles';
+```
+
+### Add a quiz card + 4 options (one CTE per card)
+```sql
+WITH new_card AS (
+  INSERT INTO cards (deck_id, front, back, notes, difficulty)
+  SELECT d.id,
+    'What is the function of the mitochondria?',
+    'Produces ATP via cellular respiration',
+    'Often called "the powerhouse of the cell".', 2
+  FROM decks d JOIN categories c ON d.category_id = c.id
+  JOIN sections s ON c.section_id = s.id
+  JOIN domains dm ON s.domain_id = dm.id
+  WHERE dm.slug = 'science' AND s.slug = 'biology' AND d.name = 'Cell Biology Quiz'
+  RETURNING id
+)
+INSERT INTO quiz_options (card_id, text, is_correct, position)
+SELECT id, 'Stores genetic information', false, 0 FROM new_card UNION ALL
+SELECT id, 'Produces ATP',              true,  1 FROM new_card UNION ALL
+SELECT id, 'Synthesises proteins',      false, 2 FROM new_card UNION ALL
+SELECT id, 'Digests waste material',    false, 3 FROM new_card;
+```
+
+---
+
+## Modifying Content
+
+### Update a card's front/back
+```sql
+UPDATE cards
+SET front = 'New question text', back = 'New answer text', updated_at = now()
+WHERE id = 'your-card-uuid-here';
+```
+
+### Update a card's difficulty
+```sql
+UPDATE cards SET difficulty = 3 WHERE id = 'your-card-uuid-here';
+```
+
+### Update a deck's name or description
+```sql
+UPDATE decks
+SET name = 'New Deck Name', description = 'Updated description'
+WHERE id = 'your-deck-uuid-here';
+```
+
+### Change a deck from flashcard to quiz
+```sql
+UPDATE decks SET deck_type = 'quiz' WHERE id = 'your-deck-uuid-here';
+```
+
+### Update a quiz option text
+```sql
+UPDATE quiz_options SET text = 'Corrected option text'
+WHERE id = 'your-option-uuid-here';
+```
+
+### Mark a different option as correct
+```sql
+-- First remove the old correct flag
+UPDATE quiz_options SET is_correct = false WHERE card_id = 'your-card-uuid';
+-- Then set the new correct one
+UPDATE quiz_options SET is_correct = true WHERE id = 'correct-option-uuid';
+```
+
+### Update a section's icon
+```sql
+UPDATE sections SET icon = '🔬'
+WHERE id = 'your-section-uuid-here';
+```
+
+---
+
+## Deleting Content
+
+> ⚠️ All tables use CASCADE DELETE — deleting a parent removes all children.
+
+### Delete a single card
+```sql
+DELETE FROM cards WHERE id = 'your-card-uuid-here';
+```
+
+### Delete all cards in a deck (keep the deck)
+```sql
+DELETE FROM cards WHERE deck_id = 'your-deck-uuid-here';
+```
+
+### Delete a deck (removes all its cards + quiz_options)
+```sql
+DELETE FROM decks WHERE id = 'your-deck-uuid-here';
+```
+
+### Delete a category (removes decks, cards, quiz_options under it)
+```sql
+DELETE FROM categories WHERE id = 'your-category-uuid-here';
+```
+
+### Delete a section (removes everything under it)
+```sql
+DELETE FROM sections WHERE id = 'your-section-uuid-here';
+```
+
+### Delete a domain (removes everything)
+```sql
+DELETE FROM domains WHERE slug = 'science';
+```
+
+### Delete quiz options for a card and re-insert
+```sql
+DELETE FROM quiz_options WHERE card_id = 'your-card-uuid-here';
+
+-- Then re-insert:
+INSERT INTO quiz_options (card_id, text, is_correct, position) VALUES
+  ('your-card-uuid', 'Option A', false, 0),
+  ('your-card-uuid', 'Option B', true,  1),
+  ('your-card-uuid', 'Option C', false, 2),
+  ('your-card-uuid', 'Option D', false, 3);
+```
+
+---
+
+## Common Patterns
+
+### Count cards per deck
+```sql
+SELECT dk.name, dk.deck_type, COUNT(cards.id) AS card_count
+FROM decks dk LEFT JOIN cards ON cards.deck_id = dk.id
+GROUP BY dk.id, dk.name, dk.deck_type
+ORDER BY dk.name;
+```
+
+### Find cards with missing quiz options (quiz decks)
+```sql
+SELECT cards.id, cards.front
+FROM cards
+JOIN decks dk ON cards.deck_id = dk.id
+WHERE dk.deck_type = 'quiz'
+AND (SELECT COUNT(*) FROM quiz_options WHERE card_id = cards.id) < 2;
+```
+
+### Find decks with no cards
+```sql
+SELECT dk.id, dk.name, dk.deck_type
+FROM decks dk
+LEFT JOIN cards ON cards.deck_id = dk.id
+WHERE cards.id IS NULL;
+```
+
+### Check a quiz card has exactly one correct option
+```sql
+SELECT card_id, COUNT(*) AS correct_count
+FROM quiz_options WHERE is_correct = true
+GROUP BY card_id
+HAVING COUNT(*) <> 1;
+-- Empty result = all quiz cards are valid
+```

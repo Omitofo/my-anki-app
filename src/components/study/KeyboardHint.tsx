@@ -4,7 +4,8 @@
 
 import { useEffect } from 'react'
 import { useStudyStore } from '@/store/studyStore'
-import { debounce } from '@/lib/utils'
+
+const BLOCKED_KEYS = new Set([' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter'])
 
 export function KeyboardHint() {
   const flipCard = useStudyStore((s) => s.flipCard)
@@ -12,26 +13,36 @@ export function KeyboardHint() {
   const prevCard = useStudyStore((s) => s.prevCard)
 
   useEffect(() => {
-    const handleKey = debounce((e: KeyboardEvent) => {
+    // Debounce state — separate from the handler so preventDefault fires immediately
+    let lastFire = 0
+    const DEBOUNCE_MS = 60
+
+    const handleKey = (e: KeyboardEvent) => {
       if (
         e.target instanceof HTMLInputElement ||
         e.target instanceof HTMLTextAreaElement ||
         e.target instanceof HTMLButtonElement
       ) return
 
+      if (!BLOCKED_KEYS.has(e.key)) return
+
+      // Always prevent default FIRST — before any debounce check.
+      // This stops the browser scroll that happens when Space/ArrowDown
+      // fires before our debounced handler would have run.
+      e.preventDefault()
+
+      const now = Date.now()
+      if (now - lastFire < DEBOUNCE_MS) return
+      lastFire = now
+
       if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-        e.preventDefault()
         flipCard()
-      }
-      if (e.key === 'ArrowRight' || e.key === 'Enter') {
-        e.preventDefault()
+      } else if (e.key === 'ArrowRight' || e.key === 'Enter') {
         nextCard()
-      }
-      if (e.key === 'ArrowLeft') {
-        e.preventDefault()
+      } else if (e.key === 'ArrowLeft') {
         prevCard()
       }
-    }, 50)
+    }
 
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)

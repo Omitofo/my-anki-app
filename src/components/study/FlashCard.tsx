@@ -68,7 +68,7 @@ export function FlashCard({ card }: FlashCardProps) {
                 </p>
 
                 {card.example && (
-                  <div className="mt-2 bg-ink-soft rounded-xl px-4 py-2.5 max-w-xs w-full">
+                  <div className="mt-2 bg-ink-soft rounded-xl px-4 py-2.5 max-w-s w-full">
                     <p className="text-[10px] text-mist/60 uppercase tracking-widest mb-1 font-mono text-center">
                       Example
                     </p>
@@ -83,7 +83,7 @@ export function FlashCard({ card }: FlashCardProps) {
               </div>
 
               {card.notes && (
-                <div className="px-5 pb-4">
+                <div className="px-7 pb-4">
                   <p className="text-[10px] text-mist/40 italic text-center">💡 {card.notes}</p>
                 </div>
               )}

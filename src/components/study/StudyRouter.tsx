@@ -19,29 +19,29 @@ interface StudyRouterProps {
 }
 
 export function StudyRouter({
-  deckType,
-  totalCards,
-  seenCount,
-  sessionCount,
-  progress,
-  isTransitioning,
+  deckType, totalCards, seenCount,
+  sessionCount, progress, isTransitioning,
 }: StudyRouterProps) {
-  const currentCard   = useStudyStore((s) => s.currentCard)
-  const historyIndex  = useStudyStore((s) => s.historyIndex)
-  const nextCard      = useStudyStore((s) => s.nextCard)
-  const prevCard      = useStudyStore((s) => s.prevCard)
+  const currentCard  = useStudyStore((s) => s.currentCard)
+  const historyIndex = useStudyStore((s) => s.historyIndex)
+  const history      = useStudyStore((s) => s.history)
+  const nextCard     = useStudyStore((s) => s.nextCard)
+  const prevCard     = useStudyStore((s) => s.prevCard)
 
   if (!currentCard) return null
 
-  // ── Quiz ────────────────────────────────────────────────────
+  const canGoPrev  = historyIndex > 0
+  // Last card: at end of history AND have seen every card at least once
+  const isLastCard = historyIndex === history.length - 1 && seenCount >= totalCards
+
   if (deckType === 'quiz') {
-    // currentCard is CardWithOptions when deck is quiz type
     return (
       <QuizCard
         card={currentCard as CardWithOptions}
         onNext={nextCard}
         onPrev={prevCard}
-        canGoPrev={historyIndex > 0}
+        canGoPrev={canGoPrev}
+        isLastCard={isLastCard}
         isTransitioning={isTransitioning}
         sessionCount={sessionCount}
         seenCount={seenCount}
@@ -51,7 +51,6 @@ export function StudyRouter({
     )
   }
 
-  // ── Flashcard (default) ─────────────────────────────────────
   return (
     <>
       <FlashCard card={currentCard} />

@@ -5,7 +5,7 @@
 import { useStudyStore } from '@/store/studyStore'
 import { useStudySession } from '@/hooks/useStudySession'
 import { StudyRouter } from '@/components/study/StudyRouter'
-import { CardSkeleton } from '@/components/ui/Skeleton'
+import { PageSpinner } from '@/components/ui/Spinner'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Button } from '@/components/ui/Button'
 
@@ -27,11 +27,7 @@ export function StudyView() {
   } = useStudySession(deck?.id ?? null, deckType)
 
   if (isLoading) {
-    return (
-      <div className="w-full max-w-2xl mx-auto animate-fade-in">
-        <CardSkeleton />
-      </div>
-    )
+    return <PageSpinner />
   }
 
   if (isError) {
