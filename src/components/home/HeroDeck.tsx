@@ -52,7 +52,7 @@ export function HeroDeck() {
       <div
         className="absolute bg-paper-card rounded-2xl border border-mist/20 shadow-sm"
         style={{
-          width: 240, height: 150,
+          width: 260, height: 180,
           top: 18, left: 8,
           transform: 'rotate(-7deg)',
           opacity: 0.35,
@@ -63,7 +63,7 @@ export function HeroDeck() {
       <div
         className="absolute bg-paper-card rounded-2xl border border-mist/20 shadow-md"
         style={{
-          width: 240, height: 150,
+          width: 260, height: 180,
           top: 10, left: 16,
           transform: 'rotate(-3.5deg)',
           opacity: 0.65,
@@ -75,7 +75,7 @@ export function HeroDeck() {
         className="absolute bg-paper-card rounded-2xl border border-mist/15 shadow-xl
                    flex flex-col items-center justify-center gap-2 overflow-hidden animate-float"
         style={{
-          width: 240, height: 150,
+          width: 260, height: 180,
           top: 0, left: 20,
           opacity: visible ? 1 : 0,
           transition: `opacity ${TRANSITION_MS}ms ease-in-out`,
