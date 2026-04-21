@@ -89,29 +89,49 @@ body {
 }
 
 /* Card flip animation */
+/* Card flip container — inherits height from content */
 .card-inner {
   width: 100%;
-  height: 100%;
+  /* Do NOT set height here; let the faces determine it */
   transition: transform 0.55s cubic-bezier(0.23, 1, 0.32, 1);
   transform-style: preserve-3d;
   position: relative;
+  /* min-height so short cards still look like cards */
+  min-height: 220px;
+}
+@media (min-width: 640px) {
+  .card-inner {
+    min-height: 260px;
+  }
 }
 
 .card-inner.flipped {
   transform: rotateY(180deg);
 }
 
+/* Each face sits on top of each other via absolute + full dimensions */
 .card-face {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  /* Position relative — height comes from content, not parent */
+  position: relative;
+  width: 100%;
+  /* The face itself is not absolute; it stacks in the flow.      */
+  /* We make the BACK face absolute so it overlaps the front.    */
+}
+/* Back face must overlay the front */
+.card-back-face {
+  transform: rotateY(180deg);
   position: absolute;
   inset: 0;
   width: 100%;
-  height: 100%;
+  /* Stretch to at least the min-height of card-inner */
+  min-height: 220px;
 }
-
-.card-back-face {
-  transform: rotateY(180deg);
+@media (min-width: 640px) {
+  .card-back-face {
+    min-height: 260px;
+  }
 }
 
 /* Noise texture overlay */
@@ -150,4 +170,63 @@ body {
 ::selection {
   background: var(--accent);
   color: white;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   APPEND these blocks to the END of src/app/globals.css
+   They add the missing animation keyframes referenced in
+   Skeleton, Spinner, and selector components.
+   ───────────────────────────────────────────────────────────── */
+
+/* ── Shimmer (used by Skeleton) ─────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.8s ease-in-out infinite;
+  background-size: 200% 100%;
+}
+
+/* ── Fade in (used by PageSpinner, StudyView) ───────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* ── Slide up (used by selector cards) ─────────────────────── */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.35s ease-out forwards;
+  opacity: 0; /* start invisible so delay feels right */
+}
+
+/* ── Float (used by HeroDeck, EmptyState icons) ─────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-6px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* ── Ping (used by PageSpinner pulse ring) ──────────────────── */
+/* Tailwind's animate-ping is already included via CDN.          */
+/* If you're NOT using the CDN version, add this:               */
+@keyframes ping {
+  75%, 100% { transform: scale(2); opacity: 0; }
+}
+
+.animate-ping {
+  animation: ping 1.2s cubic-bezier(0, 0, 0.2, 1) infinite;
 }

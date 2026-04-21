@@ -8,14 +8,14 @@ import { GridSkeleton } from '@/components/ui/Skeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import type { Category } from '@/types'
 
-// Minimalist SVG icons mapped to category slugs
+// ─── SVG icon library — keyed by category slug ───────────────
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
-  // Language categories
+
+  // ── Language ───────────────────────────────────────────────
   vocabulary: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
       <path d="M4 7V4h16v3"/>
-      <path d="M9 20h6"/>
-      <path d="M12 4v16"/>
+      <path d="M9 20h6M12 4v16"/>
     </svg>
   ),
   grammar: (
@@ -61,7 +61,8 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
       <line x1="16" y1="3" x2="14" y2="21"/>
     </svg>
   ),
-  // History categories
+
+  // ── History ────────────────────────────────────────────────
   'key-events': (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
       <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
@@ -71,8 +72,7 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
       <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
       <circle cx="9" cy="7" r="4"/>
-      <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
     </svg>
   ),
   philosophers: (
@@ -89,21 +89,32 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   ),
   law: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-      <path d="M12 22V8"/>
-      <path d="M5 12H2a10 10 0 0 0 20 0h-3"/>
-      <path d="M8 6l4-4 4 4"/>
-      <path d="M6 10l-2 4"/>
-      <path d="M18 10l2 4"/>
+      <path d="M12 22V8M5 12H2a10 10 0 0 0 20 0h-3M8 6l4-4 4 4"/>
+      <path d="M6 10l-2 4M18 10l2 4"/>
     </svg>
   ),
   scientists: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-      <path d="M8 3v4a1 1 0 0 1-1 1H3m18 0h-4a1 1 0 0 1-1-1V3"/>
-      <path d="M9 21h6m-3-3v3M12 3v4"/>
-      <path d="M6.5 17.5C4.5 15.5 3 13 3 10h18c0 3-1.5 5.5-3.5 7.5"/>
+      <path d="M6 2v6l-2 4h16l-2-4V2M6 2h12"/>
+      <path d="M5 14c0 3.87 3.13 7 7 7s7-3.13 7-7"/>
     </svg>
   ),
-  // Economics categories
+  battles: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <path d="m14.5 9.5-5 5M9.5 9.5l5 5"/>
+      <path d="M12 2a10 10 0 1 0 10 10"/>
+      <path d="M18 2h4v4"/>
+      <path d="M14 6l4-4"/>
+    </svg>
+  ),
+  causes: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 8v4M12 16h.01"/>
+    </svg>
+  ),
+
+  // ── Economics ──────────────────────────────────────────────
   economics: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
       <path d="M3 3v18h18"/>
@@ -112,9 +123,7 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   ),
   fundamentals: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-      <path d="M18 20V10"/>
-      <path d="M12 20V4"/>
-      <path d="M6 20v-6"/>
+      <path d="M18 20V10M12 20V4M6 20v-6"/>
     </svg>
   ),
   formulas: (
@@ -124,7 +133,56 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
       <circle cx="17.5" cy="17.5" r="2.5"/>
     </svg>
   ),
-  // Books categories
+  'supply-demand': (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <path d="M3 3v18h18"/>
+      <path d="M3 17l5-5 4 4 9-10"/>
+    </svg>
+  ),
+  'monetary-policy': (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 6v2m0 8v2m-3-7h6M9.5 9a2.5 2.5 0 0 1 5 0c0 2-2.5 3-2.5 5"/>
+    </svg>
+  ),
+
+  // ── Books / Philosophy ─────────────────────────────────────
+  'ancient-philosophy': (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <path d="M3 21h18M3 18h18M5 18V9l7-6 7 6v9"/>
+      <rect x="9" y="13" width="6" height="5" rx="0.5"/>
+    </svg>
+  ),
+  'modern-philosophy': (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <rect x="2" y="7" width="20" height="14" rx="2"/>
+      <path d="M16 3H8M12 3v4M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/>
+    </svg>
+  ),
+  ethics: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <path d="M12 22V8M5 12H2a10 10 0 0 0 20 0h-3M8 6l4-4 4 4"/>
+      <path d="M6 10l-2 4M18 10l2 4"/>
+    </svg>
+  ),
+
+  // ── Books / Fiction ────────────────────────────────────────
+  '19th-century-novels': (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+      <line x1="9" y1="7" x2="15" y2="7"/>
+      <line x1="9" y1="11" x2="15" y2="11"/>
+    </svg>
+  ),
+  '20th-century-novels': (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+      <path d="M12 20h9"/>
+      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+    </svg>
+  ),
   classics: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
       <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
@@ -137,7 +195,28 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
       <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
     </svg>
   ),
-  // Default
+
+  // ── Books / Non-Fiction ────────────────────────────────────
+  'history-biography': (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+      <circle cx="12" cy="7" r="4"/>
+    </svg>
+  ),
+  'science-ideas': (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <circle cx="12" cy="12" r="4"/>
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+    </svg>
+  ),
+  'politics': (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <path d="M3 21h18M3 18h18M5 18V9l7-6 7 6v9"/>
+      <rect x="9" y="13" width="6" height="5"/>
+    </svg>
+  ),
+
+  // ── Fallback ──────────────────────────────────────────────
   default: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
       <rect x="3" y="3" width="7" height="7" rx="1"/>

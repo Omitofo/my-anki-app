@@ -1,8 +1,12 @@
 'use client'
 
 // src/components/study/QuizCard.tsx
+//
+// Fix: options are shuffled client-side on each card render so the
+// correct answer is never predictably at position 0 (or any position).
+// The shuffle is stable per card.id so it doesn't re-randomise on re-render.
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
@@ -12,7 +16,34 @@ import { ProgressBar } from '@/components/ui/ProgressBar'
 import type { CardWithOptions, QuizOption } from '@/types'
 
 // ─────────────────────────────────────────────────────────────
-// Confetti — full-screen, cancellable via ref
+// Fisher-Yates shuffle seeded by card id
+// We use a simple hash of card.id so the order is stable per card
+// but random across different cards.
+// ─────────────────────────────────────────────────────────────
+function hashString(str: string): number {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i)
+    hash = (hash << 5) - hash + char
+    hash |= 0 // Convert to 32bit integer
+  }
+  return Math.abs(hash)
+}
+
+function seededShuffle<T>(arr: T[], seed: number): T[] {
+  const copy = [...arr]
+  let s = seed
+  for (let i = copy.length - 1; i > 0; i--) {
+    // LCG random number generator
+    s = (s * 1664525 + 1013904223) & 0xffffffff
+    const j = Math.abs(s) % (i + 1)
+    ;[copy[i], copy[j]] = [copy[j], copy[i]]
+  }
+  return copy
+}
+
+// ─────────────────────────────────────────────────────────────
+// Confetti
 // ─────────────────────────────────────────────────────────────
 const COLORS = [
   '#e8621a', '#4a7c59', '#f0c040',
@@ -104,12 +135,9 @@ function FullScreenConfetti({
 
         const s = p.scale
         switch (p.shape) {
-          case 'rect':
-            ctx.fillRect(-5 * s, -5 * s, 10 * s, 10 * s); break
-          case 'circle':
-            ctx.beginPath(); ctx.arc(0, 0, 5 * s, 0, Math.PI * 2); ctx.fill(); break
-          case 'strip':
-            ctx.fillRect(-2 * s, -10 * s, 4 * s, 20 * s); break
+          case 'rect':   ctx.fillRect(-5 * s, -5 * s, 10 * s, 10 * s); break
+          case 'circle': ctx.beginPath(); ctx.arc(0, 0, 5 * s, 0, Math.PI * 2); ctx.fill(); break
+          case 'strip':  ctx.fillRect(-2 * s, -10 * s, 4 * s, 20 * s); break
         }
         ctx.restore()
       }
@@ -168,6 +196,15 @@ export function QuizCard({
 
   const confettiCancelRef = useRef<(() => void) | null>(null)
 
+  // ── Shuffle options so correct answer isn't always position 0 ──
+  // Memoised on card.id — stable per card, random across cards.
+  const shuffledOptions = useMemo<QuizOption[]>(() => {
+    const opts = card.quiz_options ?? []
+    if (opts.length === 0) return opts
+    const seed = hashString(card.id)
+    return seededShuffle(opts, seed)
+  }, [card.id, card.quiz_options])
+
   const stopConfetti = useCallback(() => {
     if (confettiCancelRef.current) {
       confettiCancelRef.current()
@@ -176,6 +213,7 @@ export function QuizCard({
     setShowConfetti(false)
   }, [])
 
+  // Reset state on card change
   useEffect(() => {
     stopConfetti()
     setSelected(null)
@@ -184,8 +222,6 @@ export function QuizCard({
 
   const handleNext = () => { stopConfetti(); onNext() }
   const handlePrev = () => { stopConfetti(); onPrev() }
-
-  const options: QuizOption[] = card.quiz_options ?? []
 
   const handleSelect = (opt: QuizOption) => {
     if (state !== 'idle') return
@@ -200,7 +236,7 @@ export function QuizCard({
 
   const getVariant = (opt: QuizOption): 'idle' | 'correct' | 'wrong' | 'dim' => {
     if (state === 'idle') return 'idle'
-    if (opt.is_correct)   return 'correct'
+    if (opt.is_correct)  return 'correct'
     if (opt.id === selected) return 'wrong'
     return 'dim'
   }
@@ -221,7 +257,6 @@ export function QuizCard({
 
   const letters = ['A', 'B', 'C', 'D']
 
-  // Disabled states
   const prevDisabled = !canGoPrev || isTransitioning
   const nextDisabled = isLastCard || isTransitioning
 
@@ -258,9 +293,9 @@ export function QuizCard({
           </div>
         </div>
 
-        {/* ── Options ── */}
+        {/* ── Options (shuffled) ── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {options.map((opt, idx) => {
+          {shuffledOptions.map((opt, idx) => {
             const v      = getVariant(opt)
             const letter = letters[idx] ?? String(idx + 1)
             const icon   =
@@ -316,12 +351,16 @@ export function QuizCard({
               {state === 'correct' ? (
                 <span>
                   ✓ Correct!
-                  {card.notes && <span className="font-normal text-emerald-700/80 ml-1.5">— {card.notes}</span>}
+                  {card.notes && (
+                    <span className="font-normal text-emerald-700/80 ml-1.5">— {card.notes}</span>
+                  )}
                 </span>
               ) : (
                 <span>
                   ✗ Correct answer: <strong>{card.back}</strong>
-                  {card.notes && <span className="font-normal text-red-600/80 ml-1.5">— {card.notes}</span>}
+                  {card.notes && (
+                    <span className="font-normal text-red-600/80 ml-1.5">— {card.notes}</span>
+                  )}
                 </span>
               )}
               {card.example && (
@@ -342,12 +381,11 @@ export function QuizCard({
         {/* ── Controls ── */}
         <div className="flex items-center justify-between gap-3">
 
-          {/* Prev — clearly disabled on first card */}
           <button
             onClick={handlePrev}
             disabled={prevDisabled}
             className={cn(
-              'px-4 py-2 rounded-xl text-sm font-body font-medium border transition-all duration-200 flex items-center gap-1.5',
+              'px-4 py-2 rounded-xl text-sm font-body font-medium border transition-all duration-200',
               !prevDisabled
                 ? 'border-mist/30 text-ink hover:border-mist hover:bg-paper-warm active:scale-[0.97] cursor-pointer'
                 : 'border-mist/8 text-mist/25 cursor-not-allowed bg-paper-warm/30 opacity-40 pointer-events-none'
@@ -362,12 +400,11 @@ export function QuizCard({
             <span className="text-xs text-mist/40 font-mono">{sessionCount} answered</span>
           )}
 
-          {/* Next — clearly disabled on last card */}
           <button
             onClick={handleNext}
             disabled={nextDisabled}
             className={cn(
-              'px-4 py-2 rounded-xl text-sm font-body font-medium transition-all duration-200 flex items-center gap-1.5',
+              'px-4 py-2 rounded-xl text-sm font-body font-medium transition-all duration-200',
               !nextDisabled
                 ? 'bg-ink text-paper hover:bg-ink-soft active:scale-[0.97] shadow-sm cursor-pointer'
                 : 'bg-ink/8 text-mist/25 cursor-not-allowed border border-mist/10 opacity-40 pointer-events-none'
